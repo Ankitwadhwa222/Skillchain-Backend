@@ -1,6 +1,6 @@
 const express = require("express");
 const passport = require("passport");
-require("../services/googleauthService");
+require("../services/googleAuthService");
 const router = express.Router();
 const jwt = require("jsonwebtoken");   
 
