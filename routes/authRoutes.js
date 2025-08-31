@@ -25,10 +25,14 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login", session: false }),
   (req, res) => {
-     
-    const token = req.user.token;
+    if (!req.user || !req.user.token) {
+      return res.status(401).json({ msg: "Unauthorized" });
+    }
 
-    res.redirect(`https://skillchain-frontend.vercel.app/login-success?token=${token}`);
+    // Redirect frontend with token
+    res.redirect(
+      `https://skillchain-frontend.vercel.app/login-success?token=${req.user.token}`
+    );
   }
 );
 
