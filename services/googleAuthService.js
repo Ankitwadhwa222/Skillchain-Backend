@@ -9,15 +9,22 @@ passport.use(new googleStratergy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: `${process.env.GOOGLE_CALLBACK_URL}`,
+  scope: ["profile", "email"],
+  
 }, async (accessToken, refreshToken, profile, done) => {
    try {
+     const email =
+          profile.emails && profile.emails.length > 0
+            ? profile.emails[0].value
+            : null;
+
         // Find or create user
         let user = await User.findOne({ email: profile.emails[0].value });
 
         if (!user) {
           user = await User.create({
           fullName: profile.displayName,
-          email: profile.emails[0].value,
+          email,
           googleId: profile.id,    
           profilePicture: profile.photos?.[0]?.value || undefined,
           role: "Developer",
@@ -40,3 +47,5 @@ passport.deserializeUser(async (id, done) => {
   const user = await User.findById(id);
   done(null, user);
 });
+
+
