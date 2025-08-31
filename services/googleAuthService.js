@@ -1,35 +1,34 @@
-// passpport js is used in this 
-
 const passport = require("passport");
-const googleStratergy = require("passport-google-oauth20").Strategy;
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/User");
-const jwt = require("jsonwebtoken");
 
-passport.use(new googleStratergy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: `${process.env.GOOGLE_CALLBACK_URL}`,
-  scope: ["profile", "email"],
-  
-}, async (accessToken, refreshToken, profile, done) => {
-   try {
-     const email =
-          profile.emails && profile.emails.length > 0
-            ? profile.emails[0].value
-            : null;
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      scope: ["profile", "email"],
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const email = profile.emails?.[0]?.value || null;
 
-        // Find or create user
-        let user = await User.findOne({ email: profile.emails[0].value });
+        // Find user by email or fallback to googleId
+        let user = email
+          ? await User.findOne({ email })
+          : await User.findOne({ googleId: profile.id });
 
+        // Create user if doesn't exist
         if (!user) {
           user = await User.create({
-          fullName: profile.displayName,
-          email,
-          googleId: profile.id,    
-          profilePicture: profile.photos?.[0]?.value || undefined,
-          role: "Developer",
+            fullName: profile.displayName || profile.username,
+            email,
+            googleId: profile.id,
+            profilePicture: profile.photos?.[0]?.value || undefined,
+            role: "Developer",
           });
-     }
+        }
 
         return done(null, user);
       } catch (error) {
@@ -39,13 +38,17 @@ passport.use(new googleStratergy({
   )
 );
 
+// Serialize user
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
+// Deserialize user
 passport.deserializeUser(async (id, done) => {
-  const user = await User.findById(id);
-  done(null, user);
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
 });
-
-

@@ -12,8 +12,8 @@ const {Signup , login} = require("../controller/authController");
 router.post("/signup", Signup);
 router.post("/login", login);
 
-router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
-router.get("/github", passport.authenticate("github", { scope: ["user:email"] }));
+router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }, { session: false }));
+router.get("/github", passport.authenticate("github", { scope: ["user:email"] }, { session: false }));
 
 
 router.get(
@@ -26,15 +26,14 @@ router.get(
     });
 
     // Redirect frontend with token
-    res.redirect(`http://localhost:5173/login-success?token=${token}`);
+    res.redirect(`https://skillchain-frontend.vercel.app/login-success?token=${token}`);
   }
 );
 
 router.get("/github/callback",
-  passport.authenticate("github", { failureRedirect: "/login" }),
+  passport.authenticate("github", { failureRedirect: "/login" , session: false }),
   (req, res) => {
-    // Successful login
-    res.redirect("/dashboard"); // or wherever you want
+    res.redirect(`https://skillchain-frontend.vercel.app/login-success?token=${token}`);
   }
 );
 
