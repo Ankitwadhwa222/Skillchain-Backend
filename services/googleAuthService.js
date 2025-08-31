@@ -1,104 +1,57 @@
 const passport = require("passport");
-const GitHubStrategy = require("passport-github2").Strategy;
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
-// Helper to generate JWT
-const generateToken = (user) => {
-  return jwt.sign(
-    { id: user._id, email: user.email, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: "1h" }
-  );
+// 🔑 Helper to create JWT
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
 };
 
-// ------------------ GitHub Strategy ------------------
-// passport.use(
-//   new GitHubStrategy(
-//     {
-//       clientID: process.env.GITHUB_CLIENT_ID,
-//       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-//       callbackURL: process.env.GITHUB_CALLBACK_URL,
-//       scope: ["user:email"],
-//     },
-//     async (accessToken, refreshToken, profile, done) => {
-//       try {
-//         const email = profile.emails?.[0]?.value || null;
-
-//         let user = email
-//           ? await User.findOne({ email })
-//           : await User.findOne({ githubId: profile.id });
-
-//         if (!user) {
-//           user = await User.create({
-//             fullName: profile.displayName || profile.username,
-//             email,
-//             githubId: profile.id,
-//             profilePicture: profile.photos?.[0]?.value || undefined,
-//             role: "Developer",
-//           });
-//         }
-
-//         const token = generateToken(user);
-
-//         return done(null, { user, token });
-//       } catch (error) {
-//         return done(error, null);
-//       }
-//     }
-//   )
-// );
-
-// ------------------ Google Strategy ------------------
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL,
-      scope: ["profile", "email"],
+      callbackURL: process.env.GOOGLE_CALLBACK_URL, // Example: https://skillchain-backend.onrender.com/api/auth/google/callback
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const email = profile.emails?.[0]?.value || null;
-
-        let user = email
-          ? await User.findOne({ email })
-          : await User.findOne({ googleId: profile.id });
+        // Check if user already exists
+        let user = await User.findOne({ email: profile.emails[0].value });
 
         if (!user) {
+          // Create a new user
           user = await User.create({
-            fullName: profile.displayName || profile.username,
-            email,
-            googleId: profile.id,
-            profilePicture: profile.photos?.[0]?.value || undefined,
-            role: "Developer",
+            name: profile.displayName,
+            email: profile.emails[0].value,
+            password: null, // since OAuth users don’t need a password
+            avatar: profile.photos?.[0]?.value || null,
+            provider: "google",
           });
         }
 
-        const token = generateToken(user);
+        // Generate JWT for the user
+        const token = generateToken(user._id);
 
-        return done(null, { user, token });
-      } catch (error) {
-        return done(error, null);
+        // Pass token & user to `req.user`
+        return done(null, { ...user.toObject(), token });
+      } catch (err) {
+        console.error("❌ Google Auth Error:", err.message);
+        return done(err, null);
       }
     }
   )
 );
 
-// ------------------ Serialize / Deserialize ------------------
-passport.serializeUser((obj, done) => {
-  done(null, obj.user._id);
+// Required for passport
+passport.serializeUser((user, done) => {
+  done(null, user);
 });
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (error) {
-    done(error, null);
-  }
+passport.deserializeUser((obj, done) => {
+  done(null, obj);
 });
 
 module.exports = passport;

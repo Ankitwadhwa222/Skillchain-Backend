@@ -1,26 +1,22 @@
 const express = require("express");
 const passport = require("passport");
 require("../services/googleAuthService");
-const router = express.Router();
+require("../services/githubAuthService");
 
 const { Signup, login } = require("../controller/authController");
 
-// Auth routes
+const router = express.Router();
+
+// ------------------ Local Auth ------------------ //
 router.post("/signup", Signup);
 router.post("/login", login);
 
-// Google / GitHub login
+// ------------------ Google Auth ------------------ //
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"], session: false })
 );
 
-router.get(
-  "/github",
-  passport.authenticate("github", { scope: ["user:email"], session: false })
-);
-
-// Google callback
 router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login", session: false }),
@@ -29,22 +25,33 @@ router.get(
       return res.status(401).json({ msg: "Unauthorized" });
     }
 
-    // Redirect frontend with token
+    const token = req.user.token;
+    // Redirect frontend with JWT
     res.redirect(
-      `https://skillchain-frontend.vercel.app/login-success?token=${req.user.token}`
+      `https://skillchain-frontend.vercel.app/login-success?token=${token}`
     );
   }
 );
 
-// GitHub callback
+// ------------------ GitHub Auth ------------------ //
+router.get(
+  "/github",
+  passport.authenticate("github", { scope: ["user:email"], session: false })
+);
+
 router.get(
   "/github/callback",
   passport.authenticate("github", { failureRedirect: "/login", session: false }),
   (req, res) => {
-     
-    const token = req.user.token;
+    if (!req.user || !req.user.token) {
+      return res.status(401).json({ msg: "Unauthorized" });
+    }
 
-    res.redirect(`https://skillchain-frontend.vercel.app/login-success?token=${token}`);
+    const token = req.user.token;
+    // Redirect frontend with JWT
+    res.redirect(
+      `https://skillchain-frontend.vercel.app/login-success?token=${token}`
+    );
   }
 );
 
