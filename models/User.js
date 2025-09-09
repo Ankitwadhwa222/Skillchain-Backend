@@ -1,124 +1,123 @@
 const mongoose = require("mongoose");
+const skillSchema = require("./skillSchema")
 
 const userSchema = mongoose.Schema({
-    fullName : {
-        type : String,
-        required : true,
+    fullName: {
+        type: String,
+        required: true,
     },
-    email : {
-        type : String,
+    email: {
+        type: String,
         required: true,
         unique: true,
     },
-    password : {
-        type : String,
-        required : function () {
+    password: {
+        type: String,
+        required: function () {
             return !this.googleId;
         },
     },
-    googleId : {
-        type : String,
-        required : false,
+    googleId: {
+        type: String,
+        required: false,
     },
-    role : {
-        type : String,
-        required : true,
-        default : "user"
+    role: {
+        type: String,
+        required: true,
+        default: "user"
     },
     accountstatus: {
-    type: String,
-    enum: ["active", "inactive", "pending", "banned"],
-    default: "pending",
-  },
-    skills : [
-        {
-            type : String,
-            required : false,
-        }
-    ],
-
-    verifiedSkills : [
-        {
-            type : String,
-            required : false,
-        }
-    ],
-    portfolioLinks : [
-        {
-            github : {
-                type : String,
-                required : false,
-            },
-
-            linkedIn : {
-                type : String,
-                required :false,
-            }
-        }
-    ],
-    certifications : [
-        {
-            name : {
-                type : String,
-                required : false,
-            },
-            status : {
-                type : String,
-                enum : ["Not-Verified" , "IN-Progress" , "Verified"],
-                default : "Not-Verified",
-                required : false,
-            }
-        }
-    ],
-
-    experience : [
-        {
-            company : {
-                type : String,
-                required : false,
-            },
-            role : {
-                type : String,
-                required : false,
-            },
-            duration : {
-                type : String,
-                required : false,
-            }
-        }
-    ],
-
-    education : [
-        {
-            institution : {
-                type : String,
-                required : false,
-            },
-            degree : {
-                type : String,
-                required : false,
-            },
-            fieldOfStudy : {
-                type : String,
-                required : false,
-            },
-            startDate : {
-                type : Date,
-                required : false,
-            },
-            endDate : {
-                type : Date,
-                required : false,
-            }
-        }
-    ],
-    profilePicture : {
-        type : String,
-        default : "https://placehold.co/200x200"
+        type: String,
+        enum: ["active", "inactive", "pending", "banned"],
+        default: "pending",
+    },
+    skills: {
+        type: [skillSchema],
+        default: [],
     },
 
-    
-} , {
-        timestamps : true
-    });
+    verifiedSkills: [
+        {
+            type: String,
+            required: false,
+        }
+    ],
+    portfolioLinks: [
+        {
+            github: {
+                type: String,
+                required: false,
+            },
+
+            linkedIn: {
+                type: String,
+                required: false,
+            }
+        }
+    ],
+    certifications: [
+        {
+            name: {
+                type: String,
+                required: false,
+            },
+            status: {
+                type: String,
+                enum: ["Not-Verified", "IN-Progress", "Verified"],
+                default: "Not-Verified",
+                required: false,
+            }
+        }
+    ],
+
+    experience: [
+        {
+            company: {
+                type: String,
+                required: false,
+            },
+            role: {
+                type: String,
+                required: false,
+            },
+            duration: {
+                type: String,
+                required: false,
+            }
+        }
+    ],
+
+    education: [
+        {
+            institution: {
+                type: String,
+                required: false,
+            },
+            degree: {
+                type: String,
+                required: false,
+            },
+            fieldOfStudy: {
+                type: String,
+                required: false,
+            },
+            startDate: {
+                type: Date,
+                required: false,
+            },
+            endDate: {
+                type: Date,
+                required: false,
+            }
+        }
+    ],
+    profilePicture: {
+        type: String,
+        default: "https://placehold.co/200x200"
+    },
+
+
+}, {
+    timestamps: true
+});
 module.exports = mongoose.model("User", userSchema);

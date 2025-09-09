@@ -11,7 +11,6 @@ const router = express.Router();
 router.post("/signup", Signup);
 router.post("/login", login);
 
-// ------------------ Google Auth ------------------ //
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"], session: false })
@@ -25,10 +24,13 @@ router.get(
       return res.status(401).json({ msg: "Unauthorized" });
     }
 
-    const token = req.user.token;
-    // Redirect frontend with JWT
+    const { token, user } = req.user;
+
+    // Redirect to frontend with both token + user info
     res.redirect(
-      `https://skillchain-frontend.vercel.app/login-success?token=${token}`
+      `https://skillchain-frontend.vercel.app/login-success?token=${token}&user=${encodeURIComponent(
+        JSON.stringify(user)
+      )}`
     );
   }
 );
@@ -47,10 +49,13 @@ router.get(
       return res.status(401).json({ msg: "Unauthorized" });
     }
 
-    const token = req.user.token;
-    // Redirect frontend with JWT
+    const { token, user } = req.user;
+
+    // Redirect to frontend with both token + user info
     res.redirect(
-      `https://skillchain-frontend.vercel.app/login-success?token=${token}`
+      `https://skillchain-frontend.vercel.app/login-success?token=${token}&user=${encodeURIComponent(
+        JSON.stringify(user)
+      )}`
     );
   }
 );
