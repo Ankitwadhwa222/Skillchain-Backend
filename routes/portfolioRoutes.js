@@ -1,12 +1,18 @@
 const express = require("express");
 const router = express.Router();
 
-const { protect } = require("../middleware/authMiddleware.");
+router.use((req, res, next) => {
+  console.log(`Portfolio route hit: ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+const { protect } = require("../middleware/authMiddleware");
 const {
   addPortfolio,
   getPortfolios,
   updatePortfolio,
   deletePortfolio,
+  
 } = require("../controller/portfolioController");
 
 

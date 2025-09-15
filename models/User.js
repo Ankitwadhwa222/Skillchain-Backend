@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const skillSchema = require("./skillSchema")
+const skillSchema = require("./skillSchema");
+const portfolioSchema = require("./portfolioSchema");
 
 const userSchema = mongoose.Schema({
     fullName: {
@@ -42,19 +43,11 @@ const userSchema = mongoose.Schema({
             required: false,
         }
     ],
-    portfolioLinks: [
-        {
-            github: {
-                type: String,
-                required: false,
-            },
+    portfolioLinks: {
+        type: [portfolioSchema],
+        default: [],
+    },
 
-            linkedIn: {
-                type: String,
-                required: false,
-            }
-        }
-    ],
     certifications: [
         {
             name: {
