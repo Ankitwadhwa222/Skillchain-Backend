@@ -12,6 +12,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const skillRoutes = require("./routes/skillRoutes");
 const portfolioRoutes = require("./routes/portfolioRoutes");
+const otpRoutes = require("./routes/otpRoutes");
 
 const app = express();
 
@@ -24,7 +25,7 @@ app.use(cors());
 app.use(passport.initialize());
 
  
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes , otpRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/skills", skillRoutes);
 app.use("/api/portfolios", portfolioRoutes);
