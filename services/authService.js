@@ -17,12 +17,12 @@ const registerUser = async (fullName , email , password , role) => {
 
 
 
-// encrypting password
+ 
 
 const salt = await bcrypt.genSalt(10);
 const hashedPassword = await bcrypt.hash(password , salt);
 
-// create user
+ 
 const user = await User.create({
      fullName,
      email,

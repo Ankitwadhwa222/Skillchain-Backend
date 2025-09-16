@@ -34,19 +34,18 @@ router.post("/verify-otp", async (req, res) => {
      const {email, otp} = req.body;
      if(!email || !otp) return res.status(400).json({message : "Email and OTP are required"});      
      try {
-          const record = await OTP.find({email , otp});
+          const record = await OTP.findOne({email , otp}); // <-- use findOne
           if(!record) return res.status(400).json({message : "Invalid OTP"});
           if(record.expiresAt < new Date()) {
-               
                return res.status(400).json({message : "OTP has expired"});
           }
           await OTP.deleteOne({email, otp});
           res.status(200).json({message : "OTP verified successfully"});
      }
-          catch (error) {
-               console.error("Error verifying OTP:", error);
-               res.status(500).json({message : "Internal server error"});
-          }
+     catch (error) {
+          console.error("Error verifying OTP:", error);
+          res.status(500).json({message : "Internal server error"});
+     }
 });
 
 module.exports = router;

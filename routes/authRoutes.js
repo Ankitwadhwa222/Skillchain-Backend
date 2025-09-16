@@ -2,14 +2,34 @@ const express = require("express");
 const passport = require("passport");
 require("../services/googleAuthService");
 require("../services/githubAuthService");
+const bcrypt = require("bcrypt");
 
 const { Signup, login } = require("../controller/authController");
+const User = require("../models/User");
 
 const router = express.Router();
-
-// ------------------ Local Auth ------------------ //
+ 
 router.post("/signup", Signup);
 router.post("/login", login);
+
+
+router.post('/check-email', async (req, res) => {
+  const {email , password} = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if(user && await bcrypt.compare(password, user.password)) {
+      
+      return res.status(200).json({exists: true});
+    }
+    else {
+      return res.status(200).json({exists: false});
+    }
+  } catch (error) {
+    console.error("Error checking email:", error);
+    return res.status(500).json({exists: false});
+  }
+});
+
 
 router.get(
   "/google",
@@ -35,7 +55,7 @@ router.get(
   }
 );
 
-// ------------------ GitHub Auth ------------------ //
+ 
 router.get(
   "/github",
   passport.authenticate("github", { scope: ["user:email"], session: false })
