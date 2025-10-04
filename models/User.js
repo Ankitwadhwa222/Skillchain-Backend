@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const skillSchema = require("./skillSchema");
 const portfolioSchema = require("./portfolioSchema");
+const CertificateSchema  = require("./CertificateSchema");
+const learningPathSchema = require("./LearningPath");
+ 
+
 
 const userSchema = mongoose.Schema({
     fullName: {
@@ -43,25 +47,19 @@ const userSchema = mongoose.Schema({
             required: false,
         }
     ],
+    learningPath: {
+        type: [learningPathSchema],
+        default: [],
+    },
     portfolioLinks: {
         type: [portfolioSchema],
         default: [],
     },
 
-    certifications: [
-        {
-            name: {
-                type: String,
-                required: false,
-            },
-            status: {
-                type: String,
-                enum: ["Not-Verified", "IN-Progress", "Verified"],
-                default: "Not-Verified",
-                required: false,
-            }
-        }
-    ],
+    certifications: {
+        type: [CertificateSchema],
+        default: [],
+    },
 
     experience: [
         {

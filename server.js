@@ -13,6 +13,8 @@ const userRoutes = require("./routes/userRoutes");
 const skillRoutes = require("./routes/skillRoutes");
 const portfolioRoutes = require("./routes/portfolioRoutes");
 const otpRoutes = require("./routes/otpRoutes");
+const recommendations = require("./routes/recommendation");
+const modelRoutes = require("./routes/modelRoute");
 
 const app = express();
 
@@ -29,6 +31,9 @@ app.use("/api/auth", authRoutes , otpRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/skills", skillRoutes);
 app.use("/api/portfolios", portfolioRoutes);
+app.use("/api/certifications", require("./routes/certificationsRoutes"));
+app.use("/api/recommendations", recommendations);
+app.use("/api/models", modelRoutes);
 
  
 app.get("/", (req, res) => {
